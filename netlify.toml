@@ -1,0 +1,7 @@
+[build]
+base = "frontend"
+publish = "."
+command = ""
+
+[build.environment]
+NODE_VERSION = "20"
