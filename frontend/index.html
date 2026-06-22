@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MyHaulStore · Console</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== EDIT THIS: where your backend lives ===== */
+/* local dev: http://127.0.0.1:8000   prod: your deployed API URL */
+</style>
+<script>var API_BASE = "http://127.0.0.1:8000";</script>
+<style>
+:root{--bg:#0B0B0F;--panel:#14141B;--panel2:#1A1A23;--line:#24242F;--line2:#2E2E3B;--ink:#ECECF2;--muted:#9A9AA8;--faint:#6A6A77;--violet:#7C5CFF;--violet2:#A48BFF;--gold:#E9C46A;--paid:#1FB87A;--barter:#F0883E;--danger:#E2455A;--info:#4D8DFF;--r:16px;--shadow:0 18px 50px -20px rgba(0,0,0,.7)}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:radial-gradient(1100px 650px at 82% -8%,#18162a,transparent 55%),var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:14px}
+h1,h2,h3,h4{font-family:'Space Grotesk';margin:0;letter-spacing:-.02em}
+.num{font-variant-numeric:tabular-nums}
+.btn{border:0;border-radius:11px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;font-family:Inter;display:inline-flex;gap:7px;align-items:center;transition:.15s}
+.btn.pri{background:linear-gradient(180deg,var(--violet),#6a4ee6);color:#fff;box-shadow:0 10px 24px -10px var(--violet)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}.btn.ghost:hover{background:var(--panel2)}
+.btn.gold{background:linear-gradient(180deg,#f0d488,#d8b15a);color:#241c08;font-weight:700}
+.btn.sm{padding:7px 12px;font-size:12px}
+input,select{background:#0f0f15;border:1px solid var(--line2);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:13px;outline:none;font-family:Inter;width:100%}
+input:focus,select:focus{border-color:var(--violet)}
+.panel{background:linear-gradient(180deg,var(--panel),#121219);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow)}
+.ph{font-size:11.5px;color:var(--faint);margin:3px 0 14px}
+
+/* login */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login .box{width:min(420px,94vw);background:linear-gradient(180deg,#14141c,#0f0f15);border:1px solid var(--line2);border-radius:20px;padding:32px;box-shadow:var(--shadow)}
+.logo{width:42px;height:42px;border-radius:12px;background:conic-gradient(from 140deg,var(--violet),#c9a8ff,var(--gold),var(--violet));margin-bottom:16px}
+.login h2{font-size:22px}.login .sub{color:var(--muted);font-size:13px;margin:4px 0 18px}
+.login .field{margin-bottom:12px}.login label{font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:6px}
+.tabsw{display:flex;gap:6px;margin-bottom:16px}.tabsw button{flex:1;background:#0f0f15;border:1px solid var(--line2);color:var(--muted);border-radius:10px;padding:9px;font-weight:600;cursor:pointer}
+.tabsw button.on{background:rgba(124,92,255,.18);color:#fff;border-color:var(--violet)}
+.msg{font-size:12.5px;margin-top:10px;padding:9px 12px;border-radius:9px;display:none}
+.msg.err{display:block;background:rgba(226,69,90,.12);color:#ff9aa8}
+.msg.ok{display:block;background:rgba(31,184,122,.12);color:#7fe3bb}
+
+/* app shell */
+.app{display:none;grid-template-columns:230px 1fr;min-height:100vh}
+.side{background:linear-gradient(180deg,#101017,#0c0c12);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{display:flex;gap:10px;align-items:center;padding:6px 8px 16px}.brand b{font-size:15px}.brand span{font-size:10px;color:var(--faint);letter-spacing:.14em;text-transform:uppercase;display:block}
+.nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer}
+.nav a:hover{background:#191921;color:var(--ink)}.nav a.on{background:linear-gradient(90deg,rgba(124,92,255,.2),transparent);color:#fff;box-shadow:inset 0 0 0 1px rgba(124,92,255,.3)}
+.side .who{margin-top:auto;font-size:11.5px;color:var(--faint);padding:10px;border-top:1px solid var(--line)}
+.main{min-width:0}.top{position:sticky;top:0;z-index:5;backdrop-filter:blur(12px);background:rgba(11,11,15,.7);border-bottom:1px solid var(--line);padding:15px 26px;display:flex;align-items:center;gap:14px}
+.top h2{font-size:18px}.wrap{padding:24px 26px 60px;max-width:1240px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px}
+.stat{background:linear-gradient(180deg,var(--panel),#101017);border:1px solid var(--line);border-radius:var(--r);padding:17px;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.16),transparent 70%)}
+.stat .l{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:700}
+.stat .v{font-family:'Space Grotesk';font-size:25px;margin-top:7px}.stat .m{font-size:11px;color:var(--muted);margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:14px}
+.barlist{display:flex;flex-direction:column;gap:8px}.barrow{display:grid;grid-template-columns:110px 1fr 38px;gap:9px;align-items:center;font-size:12px}
+.barrow .nm{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar{height:8px;background:#20202a;border-radius:6px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--violet2))}.ct{text-align:right;color:var(--faint);font-weight:600}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:16px}.toolbar input,.toolbar select{width:auto}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:13px}
+.card{background:linear-gradient(180deg,var(--panel),#111118);border:1px solid var(--line);border-radius:var(--r);padding:15px;cursor:pointer;transition:.15s}.card:hover{transform:translateY(-2px);border-color:var(--line2)}
+.cn{font-family:'Space Grotesk';font-weight:600;font-size:14.5px}.ch{font-size:11px;color:var(--faint)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}.tg{font-size:10px;font-weight:600;padding:3px 7px;border-radius:6px;background:#1e1e27;color:var(--muted)}.tg.n{background:rgba(124,92,255,.16);color:var(--violet2)}.tg.t{background:rgba(233,196,106,.14);color:var(--gold)}
+.row2{display:flex;gap:9px}.met{flex:1;background:#101017;border:1px solid var(--line);border-radius:9px;padding:8px 10px}.met .l{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);font-weight:700}.met .v{font-family:'Space Grotesk';font-size:14px;margin-top:2px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}.tbl th{text-align:left;color:var(--faint);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:9px 10px;border-bottom:1px solid var(--line)}.tbl td{padding:10px;border-bottom:1px solid var(--line)}.tbl th.n,.tbl td.n{text-align:right}.tbl tr:hover td{background:#13131a}
+.pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}.pill.green{background:rgba(31,184,122,.16);color:#7fe3bb}.pill.amber{background:rgba(240,136,62,.16);color:#f6b07e}.pill.red{background:rgba(226,69,90,.16);color:#ff9aa8}.pill.gray{background:#23232e;color:var(--muted)}
+.pager{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:18px;color:var(--muted)}
+.empty{text-align:center;padding:50px;color:var(--faint)}
+.modalbg{position:fixed;inset:0;background:rgba(5,5,8,.66);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}.modalbg.show{display:flex}
+.modal{background:linear-gradient(180deg,#13131a,#0e0e14);border:1px solid var(--line2);border-radius:18px;width:min(560px,96vw);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
+.mhead{padding:18px 22px;border-bottom:1px solid var(--line)}.mbody{padding:18px 22px}.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.field{margin-bottom:12px}.field label{font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px}.full{grid-column:1/-1}
+.mfoot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:9px;justify-content:flex-end}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(15px);background:#1b1b24;border:1px solid var(--line2);padding:11px 17px;border-radius:11px;font-size:13px;font-weight:600;opacity:0;transition:.25s;z-index:40}.toast.show{opacity:1;transform:translateX(-50%)}
+.chartwrap{height:220px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="box">
+    <div class="logo"></div>
+    <h2>MyHaulStore Console</h2>
+    <div class="sub" id="loginSub">Sign in to your account</div>
+    <div class="tabsw"><button id="tabLogin" class="on" onclick="swTab('login')">Log in</button><button id="tabReg" onclick="swTab('reg')">Create account</button></div>
+    <div id="regName" class="field" style="display:none"><label>Your name</label><input id="iName" placeholder="e.g. Shivam"></div>
+    <div class="field"><label>Email</label><input id="iEmail" type="email" placeholder="you@myhaulstore.com"></div>
+    <div class="field"><label>Password</label><input id="iPass" type="password" placeholder="••••••••"></div>
+    <button class="btn pri" style="width:100%;justify-content:center" id="authBtn" onclick="doAuth()">Log in</button>
+    <div class="msg" id="authMsg"></div>
+    <div class="ph" style="margin-top:14px">The very first account becomes the <b>admin</b>. New teammates must be approved by an admin before they can log in.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <aside class="side">
+    <div class="brand"><div class="logo" style="width:32px;height:32px;margin:0"></div><div><b>MyHaulStore</b><span>Console</span></div></div>
+    <nav class="nav" id="nav">
+      <a data-v="dash" data-perm="creators.view" class="on">Dashboard</a>
+      <a data-v="creators" data-perm="creators.view">Creators</a>
+      <a data-v="exec" data-perm="executions.view">Execution</a>
+      <a data-v="brands" data-perm="brands.view">Brands</a>
+      <a data-v="reports" data-perm="reports.view">Reports</a>
+      <a data-v="finance" data-perm="finance.view">Finance &amp; Bank</a>
+      <a data-v="sheets" data-perm="sheets.manage">Sheets &amp; Sync</a>
+      <a data-v="admin" data-perm="users.manage">Admin · Access</a>
+    </nav>
+    <div class="who" id="who"></div>
+  </aside>
+  <div class="main">
+    <header class="top"><h2 id="vtitle">Dashboard</h2><div style="margin-left:auto"><button class="btn ghost sm" onclick="logout()">Log out</button></div></header>
+    <div class="wrap" id="content"></div>
+  </div>
+</div>
+
+<div class="modalbg" id="modalbg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function money(n){n=+n||0;if(!n)return'—';if(n>=1e7)return'₹'+(n/1e7).toFixed(2).replace(/\.00$/,'')+' Cr';if(n>=1e5)return'₹'+(n/1e5).toFixed(2).replace(/\.00$/,'')+' L';if(n>=1e3)return'₹'+(n/1e3).toFixed(n>=1e4?0:1)+'K';return'₹'+n;}
+function compact(n){n=+n||0;if(n>=1e7)return(n/1e7).toFixed(1)+'Cr';if(n>=1e5)return(n/1e5).toFixed(1)+'L';if(n>=1e3)return(n/1e3).toFixed(n>=1e4?0:1)+'K';return''+n;}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2300);}
+let TOKEN=localStorage.getItem('mhs_token')||'';let ME=null;let charts={};let PERMS_ALL=[];
+function can(p){return ME&&(ME.role==='admin'||(ME.permissions||[]).includes(p));}
+
+async function api(path,opts={}){
+  opts.headers=Object.assign({'Content-Type':'application/json'},opts.headers||{});
+  if(TOKEN)opts.headers['Authorization']='Bearer '+TOKEN;
+  const r=await fetch(API_BASE+path,opts);
+  if(r.status===401){logout();throw new Error('Session expired');}
+  const t=await r.text();let j;try{j=t?JSON.parse(t):{};}catch(e){throw new Error('Bad server response');}
+  if(!r.ok)throw new Error(j.detail||('Error '+r.status));
+  return j;
+}
+
+/* ---------- auth ---------- */
+let mode='login';
+function swTab(m){mode=m;$('tabLogin').classList.toggle('on',m==='login');$('tabReg').classList.toggle('on',m==='reg');
+  $('regName').style.display=m==='reg'?'block':'none';$('authBtn').textContent=m==='reg'?'Create account':'Log in';$('authMsg').className='msg';}
+function showMsg(t,ok){const m=$('authMsg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
+async function doAuth(){const email=$('iEmail').value.trim(),pass=$('iPass').value;
+  if(!email||!pass){showMsg('Enter email and password');return;}
+  try{
+    if(mode==='reg'){
+      const u=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email,password:pass,name:$('iName').value.trim()})});
+      if(u.approved){showMsg('Admin account created! Logging you in…',true);await login(email,pass);}
+      else{showMsg('Account created. An admin must approve you before you can log in.',true);swTab('login');}
+    }else{await login(email,pass);}
+  }catch(e){showMsg(e.message);}
+}
+async function login(email,pass){
+  const form=new URLSearchParams();form.set('username',email);form.set('password',pass);
+  const r=await fetch(API_BASE+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:form});
+  const j=await r.json();if(!r.ok)throw new Error(j.detail||'Login failed');
+  TOKEN=j.access_token;localStorage.setItem('mhs_token',TOKEN);ME=j.user;enterApp();
+}
+function logout(){TOKEN='';ME=null;localStorage.removeItem('mhs_token');$('app').style.display='none';$('login').style.display='flex';}
+async function enterApp(){
+  try{ME=ME||await api('/api/auth/me');}catch(e){logout();return;}
+  try{PERMS_ALL=(await api('/api/permissions')).permissions;}catch(e){PERMS_ALL=[];}
+  $('login').style.display='none';$('app').style.display='grid';
+  $('who').innerHTML=esc(ME.name||ME.email)+'<br><span style="color:var(--violet2)">'+ME.role+'</span>';
+  // gate nav by permission
+  let firstVisible=null;
+  [...$('nav').children].forEach(a=>{const p=a.dataset.perm;const ok=!p||can(p);a.style.display=ok?'block':'none';if(ok&&!firstVisible)firstVisible=a;});
+  [...$('nav').children].forEach(x=>x.classList.remove('on'));
+  if(firstVisible){firstVisible.classList.add('on');go(firstVisible.dataset.v);}
+  else $('content').innerHTML='<div class="empty">Your account has no permissions yet. Ask an admin to grant access.</div>';
+}
+
+/* ---------- nav ---------- */
+$('nav').addEventListener('click',e=>{const a=e.target.closest('a[data-v]');if(!a)return;[...$('nav').children].forEach(x=>x.classList.remove('on'));a.classList.add('on');go(a.dataset.v);});
+function go(v){const T={dash:'Dashboard',creators:'Creators',exec:'Execution',brands:'Brands',reports:'Reports',finance:'Finance & Bank',sheets:'Sheets & Sync',admin:'Admin · Access'};$('vtitle').textContent=T[v];
+  destroyCharts();
+  ({dash:renderDash,creators:renderCreators,exec:renderExec,brands:renderBrands,reports:renderReports,finance:renderFinance,sheets:renderSheets,admin:renderAdmin}[v])();}
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
+function stat(l,v,m){return `<div class="stat"><div class="l">${l}</div><div class="v num">${v}</div><div class="m">${m||''}</div></div>`;}
+
+/* ---------- dashboard ---------- */
+async function renderDash(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  let s;try{s=await api('/api/stats');}catch(e){return err(e);}
+  const mx=Math.max(1,...s.top_niches.map(x=>x[1])),mxl=Math.max(1,...s.top_locs.map(x=>x[1]));
+  $('content').innerHTML=`<div class="stats">
+    ${stat('Total creators',(s.total).toLocaleString('en-IN'),'live in database')}
+    ${stat('Combined reach',compact(s.reach),'sum of followers')}
+    ${stat('Avg reel cost',money(s.avg_reel),'priced creators')}
+    ${stat('Priced creators',(s.by_price.paid).toLocaleString('en-IN'),s.by_price.barter+' barter · '+s.by_price.open+' open')}
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Top niches</h3><div class="ph">Where your roster is strongest</div><div class="barlist">${s.top_niches.map(([n,c])=>`<div class="barrow"><div class="nm">${esc(n)}</div><div class="bar"><span style="width:${c/mx*100}%"></span></div><div class="ct">${c}</div></div>`).join('')||'<div class="ph">No data — import a sheet.</div>'}</div></div>
+    <div class="panel"><h3>Price split</h3><div class="ph">Priced / barter / open</div><div class="chartwrap"><canvas id="cP"></canvas></div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Top locations</h3><div class="ph">Primary city</div><div class="barlist">${s.top_locs.map(([n,c])=>`<div class="barrow"><div class="nm">${esc(n)}</div><div class="bar"><span style="width:${c/mxl*100}%;background:linear-gradient(90deg,var(--gold),#f4dd9e)"></span></div><div class="ct">${c}</div></div>`).join('')||'<div class="ph">—</div>'}</div></div>
+    <div class="panel"><h3>By tier</h3><div class="ph">Nano → Mega</div><div class="chartwrap"><canvas id="cT"></canvas></div></div>
+  </div>`;
+  charts.cP=new Chart($('cP'),{type:'doughnut',data:{labels:['Priced','Barter','Open'],datasets:[{data:[s.by_price.paid,s.by_price.barter,s.by_price.open],backgroundColor:['#1FB87A','#F0883E','#5b5b68'],borderWidth:0}]},options:{cutout:'64%',plugins:{legend:{position:'bottom',labels:{color:'#9A9AA8',usePointStyle:true,pointStyle:'circle',padding:13}}}}});
+  charts.cT=new Chart($('cT'),{type:'bar',data:{labels:Object.keys(s.by_tier),datasets:[{data:Object.values(s.by_tier),backgroundColor:'#7C5CFF',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#9A9AA8'}},y:{grid:{color:'#1f1f29'},ticks:{color:'#6A6A77',precision:0}}}}});
+}
+
+/* ---------- creators ---------- */
+let cq={page:1,q:'',niche:'',tier:'',price:'',sort:'followers'};
+async function renderCreators(){
+  $('content').innerHTML=`<div class="toolbar">
+    <input id="cSearch" placeholder="Search name, niche, city…" value="${esc(cq.q)}" style="min-width:240px">
+    <select id="cPrice"><option value="">All prices</option><option value="paid">Priced</option><option value="barter">Barter</option><option value="open">Open</option></select>
+    <select id="cSort"><option value="followers">Followers ↓</option><option value="engagement">Engagement ↓</option><option value="reel_cost">Reel cost ↓</option><option value="name">Name A–Z</option></select>
+    <button class="btn pri sm" onclick="creatorModal()">+ Add creator</button>
+    <span style="margin-left:auto;color:var(--faint)" id="cCount"></span>
+  </div><div class="cgrid" id="cgrid"></div><div class="pager" id="cpager"></div>`;
+  $('cPrice').value=cq.price;$('cSort').value=cq.sort;
+  let t=null;$('cSearch').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{cq.q=e.target.value.trim();cq.page=1;loadCreators();},300);};
+  $('cPrice').onchange=e=>{cq.price=e.target.value;cq.page=1;loadCreators();};
+  $('cSort').onchange=e=>{cq.sort=e.target.value;loadCreators();};
+  loadCreators();
+}
+async function loadCreators(){$('cgrid').innerHTML='<div class="empty">Loading…</div>';
+  let j;try{j=await api('/api/creators?'+new URLSearchParams({page:cq.page,page_size:60,q:cq.q,price:cq.price,sort:cq.sort}));}catch(e){return err(e);}
+  window.__c=Object.fromEntries(j.rows.map(r=>[r.id,r]));
+  $('cCount').textContent=(j.total).toLocaleString('en-IN')+' creators';
+  if(!j.rows.length){$('cgrid').innerHTML='<div class="empty">No creators. Import a sheet or add one.</div>';$('cpager').innerHTML='';return;}
+  $('cgrid').innerHTML=j.rows.map(c=>`<div class="card" onclick="creatorModal(${c.id})">
+    <div class="cn">${esc(c.name)}</div><div class="ch">${c.handle?'@'+esc(c.handle):'—'} · ${esc(c.platform)}</div>
+    <div class="tags">${c.niche?`<span class="tg n">${esc(String(c.niche).split(/[\/,]/)[0])}</span>`:''}${c.tier?`<span class="tg t">${esc(c.tier)}</span>`:''}${c.engagement?`<span class="tg">${c.engagement}% eng</span>`:''}</div>
+    <div class="row2"><div class="met"><div class="l">Followers</div><div class="v">${compact(c.followers)}</div></div><div class="met"><div class="l">Reel</div><div class="v">${money(c.reel_cost)}</div></div></div>
+  </div>`).join('');
+  const pages=Math.ceil(j.total/60);
+  $('cpager').innerHTML=pages>1?`<button class="btn ghost sm" ${cq.page<=1?'disabled':''} onclick="cq.page--;loadCreators()">← Prev</button><span>Page ${cq.page} / ${pages}</span><button class="btn ghost sm" ${cq.page>=pages?'disabled':''} onclick="cq.page++;loadCreators()">Next →</button>`:'';
+}
+function creatorModal(id){const c=(id&&window.__c&&window.__c[id])||{};
+  openModal(`${id?'Edit creator':'New creator'}`,`<div class="f2">
+    <div class="field"><label>Name *</label><input id="m-name" value="${esc(c.name||'')}"></div>
+    <div class="field"><label>MHS ID</label><input id="m-mhs" value="${esc(c.mhs_id||'')}"></div>
+    <div class="field full"><label>Instagram link</label><input id="m-link" value="${esc(c.link||'')}"></div>
+    <div class="field"><label>Followers</label><input id="m-fol" type="number" value="${c.followers||''}"></div>
+    <div class="field"><label>Niche</label><input id="m-niche" value="${esc(c.niche||'')}"></div>
+    <div class="field"><label>Tier</label><select id="m-tier"><option value="">Auto</option>${['Nano','Micro','Mid','Macro','Mega'].map(t=>`<option ${c.tier===t?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="field"><label>Location</label><input id="m-loc" value="${esc(c.location||'')}"></div>
+    <div class="field"><label>Added by</label><input id="m-ab" value="${esc(c.added_by||'')}"></div>
+    <div class="field"><label>Reel cost (₹)</label><input id="m-reel" type="number" value="${c.reel_cost||''}"></div>
+    <div class="field"><label>Price bucket</label><select id="m-pb">${['open','paid','barter'].map(b=>`<option ${c.price_bucket===b?'selected':''}>${b}</option>`).join('')}</select></div>
+    <div class="field full"><label>Reel links (one per line)</label><textarea id="m-reels" rows="2" style="width:100%;background:#0f0f15;border:1px solid var(--line2);color:var(--ink);border-radius:10px;padding:10px">${esc(c.reel_links||'')}</textarea></div>
+  </div>`,`<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="saveCreator(${id||0})">Save</button>`);
+}
+async function saveCreator(id){const v=x=>$('m-'+x).value.trim();if(!v('name')){toast('Name required');return;}
+  const body={name:v('name'),mhs_id:v('mhs'),link:v('link'),followers:+v('fol')||0,niche:v('niche'),tier:$('m-tier').value,location:v('loc'),added_by:v('ab'),reel_cost:+v('reel')||0,price_bucket:$('m-pb').value,reel_links:$('m-reels').value.trim()};
+  try{await api(id?`/api/creators/${id}`:'/api/creators',{method:id?'PUT':'POST',body:JSON.stringify(body)});closeModal();toast('Saved');loadCreators();}catch(e){toast(e.message);}
+}
+
+/* ---------- execution ---------- */
+function pct(e){if(e.status==='Completed')return 100;if(e.status==='Cancelled')return 0;return Math.round(['brief','content','posted','invoice','paid'].filter(k=>e[k]).length/5*100);}
+const STG={'Shortlisted':'#8A8F9C','Final':'#7C5CFF','PO Raised':'#F0883E','PO Received':'#1FB87A'};
+async function renderExec(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  let ex;try{ex=await api('/api/executions');}catch(e){return err(e);}window.__e=Object.fromEntries(ex.map(e=>[e.id,e]));
+  const byB={};ex.forEach(e=>{(byB[e.brand]=byB[e.brand]||[]).push(e);});
+  const tb=ex.reduce((s,e)=>s+(+e.budget||0),0),td=ex.reduce((s,e)=>s+(+e.deliv||0),0);
+  let h=`<div class="stats">${stat('Executions',ex.length,Object.keys(byB).length+' brands')}${stat('Completed',ex.filter(e=>e.status==='Completed').length,ex.filter(e=>e.paid).length+' paid')}${stat('Brand budget',money(tb),'committed')}${stat('Margin',money(tb-td),'budget − deliverable')}</div>
+  <div class="toolbar"><button class="btn pri sm" style="margin-left:auto" onclick="execModal()">+ New execution</button></div>`;
+  if(!ex.length){h+='<div class="empty">No executions yet. Add one to build brand history.</div>';}
+  else{h+='<div class="panel"><table class="tbl"><thead><tr><th>Creator</th><th>Brand</th><th>Campaign</th><th>Stage</th><th class="n">Budget</th><th>Status</th><th class="n">Done</th><th></th></tr></thead><tbody>'+
+    ex.map(e=>`<tr><td><b>${esc(e.creator_name||'—')}</b></td><td>${esc(e.brand)}${e.brand_category?` <span class="tg">${esc(e.brand_category)}</span>`:''}</td><td>${esc(e.campaign||'—')}</td><td>${esc(e.stage)}</td><td class="n">${money(e.budget)}</td><td><span class="pill ${e.status==='Completed'?'green':e.status==='Cancelled'?'red':'amber'}">${e.status}</span></td><td class="n">${pct(e)}%</td><td><button class="btn ghost sm" onclick="execModal(${e.id})">Edit</button></td></tr>`).join('')+'</tbody></table></div>';}
+  $('content').innerHTML=h;
+}
+function execModal(id){const e=(id&&window.__e&&window.__e[id])||{};
+  openModal(`${id?'Edit':'New'} execution`,`<div class="f2">
+    <div class="field full"><label>Creator name</label><input id="x-cn" value="${esc(e.creator_name||'')}"></div>
+    <div class="field"><label>Brand *</label><input id="x-b" value="${esc(e.brand||'')}"></div>
+    <div class="field"><label>Brand category</label><input id="x-bc" value="${esc(e.brand_category||'')}"></div>
+    <div class="field"><label>Campaign</label><input id="x-c" value="${esc(e.campaign||'')}"></div>
+    <div class="field"><label>Month</label><input id="x-m" value="${esc(e.month||'')}"></div>
+    <div class="field"><label>Stage</label><select id="x-st">${Object.keys(STG).map(s=>`<option ${e.stage===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>Status</label><select id="x-status">${['Active','Completed','Cancelled'].map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>Reels</label><input id="x-r" type="number" value="${e.reels||0}"></div>
+    <div class="field"><label>Budget (₹)</label><input id="x-bud" type="number" value="${e.budget||''}"></div>
+    <div class="field"><label>Deliverable (₹)</label><input id="x-d" type="number" value="${e.deliv||''}"></div>
+    <div class="field full"><label>Checklist</label><div style="display:flex;gap:14px;flex-wrap:wrap">${['brief|Briefed','content|Content','posted|Posted','invoice|Invoice','paid|Paid'].map(p=>{const[k,l]=p.split('|');return `<label style="display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12.5px"><input type="checkbox" id="x-${k}" ${e[k]?'checked':''} style="width:auto"> ${l}</label>`;}).join('')}</div></div>
+  </div>`,`${id?`<button class="btn ghost" style="margin-right:auto;color:#f08" onclick="delExec(${id})">Delete</button>`:''}<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="saveExec(${id||0})">Save</button>`);
+}
+async function saveExec(id){const v=x=>$('x-'+x).value.trim();if(!v('b')){toast('Brand required');return;}
+  const body={creator_name:v('cn'),brand:v('b'),brand_category:v('bc'),campaign:v('c'),month:v('m'),stage:$('x-st').value,status:$('x-status').value,reels:+v('r')||0,budget:+v('bud')||0,deliv:+v('d')||0,brief:$('x-brief').checked,content:$('x-content').checked,posted:$('x-posted').checked,invoice:$('x-invoice').checked,paid:$('x-paid').checked};
+  try{await api(id?`/api/executions/${id}`:'/api/executions',{method:id?'PUT':'POST',body:JSON.stringify(body)});closeModal();toast('Saved');renderExec();}catch(e){toast(e.message);}
+}
+async function delExec(id){if(!confirm('Delete?'))return;try{await api(`/api/executions/${id}`,{method:'DELETE'});closeModal();renderExec();}catch(e){toast(e.message);}}
+
+/* ---------- brands ---------- */
+async function renderBrands(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  let j;try{j=await api('/api/brands');}catch(e){return err(e);}const B=j.brands;window.__b=B;
+  if(!B.length){$('content').innerHTML='<div class="empty">No brand work yet. Add executions.</div>';return;}
+  $('content').innerHTML=`<div class="cgrid">${B.map((b,i)=>`<div class="card" onclick="brandModal(${i})">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-size:15px">${esc(b.brand)}</h3>${b.category?`<span class="tg t">${esc(b.category)}</span>`:''}</div>
+    <div class="row2" style="margin-top:12px"><div class="met"><div class="l">Campaigns</div><div class="v">${b.campaigns}</div></div><div class="met"><div class="l">Creators</div><div class="v">${b.creators}</div></div><div class="met"><div class="l">Reels</div><div class="v">${b.reels}</div></div></div>
+    <div style="margin-top:11px"><div class="l" style="font-size:9px;color:var(--faint);text-transform:uppercase">Completion ${b.completion}%</div><div class="bar" style="margin-top:5px"><span style="width:${b.completion}%;background:linear-gradient(90deg,var(--paid),#54d3a3)"></span></div></div>
+    <div style="margin-top:11px;font-size:11.5px;color:var(--faint)">Budget <b style="color:#7fe3bb;float:right">${money(b.budget)}</b></div>
+  </div>`).join('')}</div>`;
+}
+function brandModal(i){const b=window.__b[i];
+  openModal(esc(b.brand),`<div class="ph">${b.category?esc(b.category)+' · ':''}${b.campaigns} campaigns · ${b.creators} creators with MyHaulStore</div>
+    <table class="tbl"><thead><tr><th>Creator</th><th>Campaign</th><th class="n">Reels</th><th class="n">Budget</th><th class="n">Done</th></tr></thead><tbody>
+    ${b.items.map(e=>`<tr><td><b>${esc(e.creator_name||'—')}</b></td><td>${esc(e.campaign||'—')}<br><span class="ch">${esc(e.month||'')} · ${esc(e.stage||'')}</span></td><td class="n">${e.reels||0}</td><td class="n">${money(e.budget)}</td><td class="n">${pct(e)}%</td></tr>`).join('')}</tbody></table>`,
+    `<button class="btn ghost" onclick="closeModal()">Close</button>`);
+}
+
+/* ---------- reports ---------- */
+async function renderReports(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  let r;try{r=await api('/api/reports/summary');}catch(e){return err(e);}
+  const mx=Math.max(1,...r.top_brands.map(x=>x[1]));
+  $('content').innerHTML=`<div class="stats">${stat('Total brand budget',money(r.total_budget),'all campaigns')}${stat('Deliverable cost',money(r.total_deliv),'our side')}${stat('Margin',money(r.margin),'budget − deliverable')}${stat('Completed',r.completed,r.active+' active · '+r.paid_campaigns+' paid')}</div>
+    <div class="panel"><h3>Top brands by spend</h3><div class="ph">Where the money comes from</div><div class="barlist">${r.top_brands.map(([b,v])=>`<div class="barrow"><div class="nm">${esc(b)}</div><div class="bar"><span style="width:${v/mx*100}%"></span></div><div class="ct">${compact(v)}</div></div>`).join('')||'<div class="ph">No data.</div>'}</div></div>
+    <div class="panel" style="margin-top:13px"><h3>Budget by month</h3><div class="ph">Spend over time</div><table class="tbl"><thead><tr><th>Month</th><th class="n">Budget</th></tr></thead><tbody>${r.by_month.map(([m,v])=>`<tr><td>${esc(m)}</td><td class="n">${money(v)}</td></tr>`).join('')||'<tr><td colspan=2 class="ph">No month data</td></tr>'}</tbody></table></div>`;
+}
+
+/* ---------- finance ---------- */
+async function renderFinance(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  let s,rows;try{[s,rows]=await Promise.all([api('/api/finance/summary'),api('/api/finance')]);}catch(e){return err(e);}
+  $('content').innerHTML=`<div class="stats">${stat('Income',money(s.income),'received')}${stat('Expense',money(s.expense),'paid out')}${stat('Net',money(s.net),'income − expense')}${stat('Pending',money(s.pending),'not cleared')}</div>
+    <div class="toolbar"><h3 style="font-family:Space Grotesk">Ledger</h3><button class="btn pri sm" style="margin-left:auto" onclick="finModal()">+ Add entry</button></div>
+    <div class="panel"><table class="tbl"><thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Brand / Creator</th><th>Account</th><th class="n">Amount</th><th>Status</th></tr></thead><tbody>
+      ${rows.length?rows.map(f=>`<tr><td>${esc(f.date||'—')}</td><td><span class="pill ${f.kind==='income'?'green':'amber'}">${f.kind}</span></td><td>${esc(f.category||'—')}</td><td>${esc(f.brand||f.creator_name||'—')}</td><td>${esc(f.account||'—')}</td><td class="n">${money(f.amount)}</td><td><span class="pill ${f.status==='cleared'?'green':'gray'}">${f.status}</span></td></tr>`).join(''):'<tr><td colspan=7 class="ph">No entries yet.</td></tr>'}
+    </tbody></table></div>
+    <div class="panel" style="margin-top:13px"><h3>By bank account</h3><div class="ph">Net movement per account</div><table class="tbl"><tbody>${s.by_account.map(([a,v])=>`<tr><td>${esc(a)}</td><td class="n">${money(v)}</td></tr>`).join('')||'<tr><td class="ph">No accounts</td></tr>'}</tbody></table></div>`;
+}
+function finModal(){openModal('Add finance entry',`<div class="f2">
+    <div class="field"><label>Date</label><input id="z-date" placeholder="2026-06-12"></div>
+    <div class="field"><label>Type</label><select id="z-kind"><option value="income">income</option><option value="expense">expense</option></select></div>
+    <div class="field"><label>Category</label><input id="z-cat" placeholder="Brand payment / Creator payout"></div>
+    <div class="field"><label>Bank account</label><input id="z-acc" placeholder="HDFC current"></div>
+    <div class="field"><label>Brand</label><input id="z-brand"></div>
+    <div class="field"><label>Creator</label><input id="z-cr"></div>
+    <div class="field"><label>Amount (₹)</label><input id="z-amt" type="number"></div>
+    <div class="field"><label>Status</label><select id="z-status"><option value="pending">pending</option><option value="cleared">cleared</option></select></div>
+    <div class="field full"><label>Reference (invoice / UTR)</label><input id="z-ref"></div>
+  </div>`,`<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="saveFin()">Save</button>`);}
+async function saveFin(){const v=x=>$('z-'+x).value.trim();
+  const body={date:v('date'),kind:$('z-kind').value,category:v('cat'),account:v('acc'),brand:v('brand'),creator_name:v('cr'),amount:+v('amt')||0,status:$('z-status').value,ref:v('ref')};
+  try{await api('/api/finance',{method:'POST',body:JSON.stringify(body)});closeModal();toast('Saved');renderFinance();}catch(e){toast(e.message);}
+}
+
+/* ---------- admin ---------- */
+const PERM_LABEL={'creators.view':'View creators','creators.edit':'Add/edit creators','executions.view':'View execution','executions.edit':'Edit execution','brands.view':'View brands','reports.view':'View reports','finance.view':'View finance','finance.edit':'Edit finance','sheets.manage':'Manage sheets & sync','instagram.sync':'Run Instagram sync','users.manage':'Manage users & access'};
+let USERS=[];
+async function renderAdmin(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  try{USERS=await api('/api/admin/users');}catch(e){return err(e);}
+  $('content').innerHTML=`<div class="panel"><h3>Accounts &amp; access</h3><div class="ph">Approve teammates before they can log in. Give each person ONLY the permissions they need — they can see and do nothing else. Admins automatically have everything.</div>
+    <table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Permissions</th><th></th></tr></thead><tbody>
+    ${USERS.map((u,i)=>`<tr><td><b>${esc(u.name||'—')}</b></td><td>${esc(u.email)}</td><td><span class="pill ${u.role==='admin'?'green':'gray'}">${u.role}</span></td>
+      <td>${u.approved?'<span class="pill green">approved</span>':'<span class="pill amber">pending</span>'}</td>
+      <td style="font-size:11px;color:var(--muted)">${u.role==='admin'?'<i>all</i>':(u.permissions.length?u.permissions.length+' granted':'none')}</td>
+      <td style="white-space:nowrap">${u.approved?'':`<button class="btn pri sm" onclick="approve(${u.id})">Approve</button> `}${u.role==='admin'?`<button class="btn ghost sm" onclick="setRole(${u.id},'user')">Make user</button>`:`<button class="btn ghost sm" onclick="permModal(${i})">Permissions</button> <button class="btn ghost sm" onclick="setRole(${u.id},'admin')">Make admin</button>`}</td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+async function approve(id){try{await api(`/api/admin/users/${id}/approve`,{method:'POST'});toast('Approved');renderAdmin();}catch(e){toast(e.message);}}
+async function setRole(id,role){try{await api(`/api/admin/users/${id}/role/${role}`,{method:'POST'});toast('Updated');renderAdmin();}catch(e){toast(e.message);}}
+function permModal(i){const u=USERS[i];const have=new Set(u.permissions);
+  const list=(PERMS_ALL.length?PERMS_ALL:Object.keys(PERM_LABEL));
+  openModal('Permissions · '+esc(u.name||u.email),
+    `<div class="ph">Tick what ${esc(u.name||u.email)} is allowed to see and do.</div>
+     ${list.map(p=>`<label style="display:flex;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" value="${p}" ${have.has(p)?'checked':''} style="width:auto"> ${esc(PERM_LABEL[p]||p)} <span style="margin-left:auto;color:var(--faint);font-size:11px">${p}</span></label>`).join('')}`,
+    `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="savePerms(${u.id})">Save permissions</button>`);
+}
+async function savePerms(id){const perms=[...document.querySelectorAll('#modal input[type=checkbox]:checked')].map(x=>x.value);
+  try{await api(`/api/admin/users/${id}/permissions`,{method:'POST',body:JSON.stringify({permissions:perms})});closeModal();toast('Permissions saved');renderAdmin();}catch(e){toast(e.message);}}
+
+/* ---------- sheets & sync ---------- */
+async function renderSheets(){$('content').innerHTML='<div class="empty">Loading…</div>';
+  let sheets,settings;try{[sheets,settings]=await Promise.all([api('/api/sheets'),(can('users.manage')?api('/api/settings'):Promise.resolve(null))]);}catch(e){return err(e);}
+  const igPanel = settings ? `<div class="panel" style="margin-top:14px"><h3>Instagram & auto-sync</h3>
+    <div class="ph">Updates each creator's followers + engagement (public Business/Creator accounts only). Audience gender/location is never available from Instagram — keep those manual.</div>
+    <div class="f2">
+      <div class="field"><label>Instagram Business account ID</label><input id="ig-biz" value="${esc(settings.ig_business_id||'')}" placeholder="17841…"></div>
+      <div class="field"><label>Long-lived access token ${settings.ig_configured?'<span class="pill green" style="margin-left:6px">set</span>':''}</label><input id="ig-tok" type="password" placeholder="${settings.ig_configured?'•••••••• (leave blank to keep)':'paste token'}"></div>
+      <div class="field"><label>Auto-sync every (minutes, 0 = off)</label><input id="ig-min" type="number" value="${settings.sync_minutes||0}"></div>
+    </div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn ghost" onclick="saveSettings()">Save settings</button>${can('instagram.sync')?`<button class="btn gold" onclick="igSync()">⚡ Sync Instagram now</button>`:''}</div>
+    <div class="ph" style="margin-top:8px">Auto-sync needs the server started with the always-on flag — see README. Or press “Sync now”, or run sheets sync on a timer.</div>
+  </div>`:'';
+  $('content').innerHTML=`<div class="panel"><h3>Connected sheets</h3>
+    <div class="ph">Add a sheet ONCE here — it stays connected. Press Sync to pull it into the app, or turn on auto-sync below. (Publish your sheet first: File → Share → Publish to web → CSV → copy the link.)</div>
+    <div class="f2" style="align-items:end">
+      <div class="field"><label>Name</label><input id="sh-name" placeholder="With price / Barter…"></div>
+      <div class="field"><label>Default price bucket</label><select id="sh-price"><option value="open">open</option><option value="paid">paid</option><option value="barter">barter</option></select></div>
+      <div class="field full"><label>Published CSV link</label><input id="sh-url" placeholder="https://docs.google.com/…/pub?output=csv"></div>
+    </div>
+    <button class="btn pri" onclick="addSheet()">+ Add sheet</button>
+    <button class="btn ghost" onclick="syncAll()" style="margin-left:8px">Sync all now</button>
+    <table class="tbl" style="margin-top:16px"><thead><tr><th>Name</th><th>Bucket</th><th class="n">Rows</th><th>Last synced</th><th></th></tr></thead><tbody>
+      ${sheets.length?sheets.map(s=>`<tr><td><b>${esc(s.name||'—')}</b><div class="ch" style="max-width:280px;overflow:hidden;text-overflow:ellipsis">${esc(s.csv_url)}</div></td><td><span class="pill gray">${s.price_default}</span></td><td class="n">${s.row_count||0}</td><td>${esc(s.last_synced||'never')}</td><td style="white-space:nowrap"><button class="btn ghost sm" onclick="syncSheet(${s.id})">Sync</button> <button class="btn ghost sm" style="color:#f08" onclick="delSheet(${s.id})">Delete</button></td></tr>`).join(''):'<tr><td colspan=5 class="ph">No sheets yet. Add one above.</td></tr>'}
+    </tbody></table></div>${igPanel}`;
+}
+async function addSheet(){const name=$('sh-name').value.trim(),url=$('sh-url').value.trim();if(!url){toast('Paste the published CSV link');return;}
+  try{await api('/api/sheets',{method:'POST',body:JSON.stringify({name,csv_url:url,price_default:$('sh-price').value,active:true})});toast('Sheet added');renderSheets();}catch(e){toast(e.message);}}
+async function syncSheet(id){toast('Syncing…');try{const r=await api(`/api/sheets/${id}/sync`,{method:'POST'});toast('Imported '+r.imported+' rows');renderSheets();}catch(e){toast(e.message);}}
+async function syncAll(){toast('Syncing all…');try{const r=await api('/api/sheets/sync-all',{method:'POST'});toast('Imported '+r.imported+' rows');renderSheets();}catch(e){toast(e.message);}}
+async function delSheet(id){if(!confirm('Remove this sheet connection?'))return;try{await api(`/api/sheets/${id}`,{method:'DELETE'});renderSheets();}catch(e){toast(e.message);}}
+async function saveSettings(){const body={ig_business_id:$('ig-biz').value.trim(),sync_minutes:+$('ig-min').value||0};const tok=$('ig-tok').value.trim();if(tok)body.ig_token=tok;
+  try{await api('/api/settings',{method:'POST',body:JSON.stringify(body)});toast('Settings saved');renderSheets();}catch(e){toast(e.message);}}
+async function igSync(){toast('Contacting Instagram…');try{const r=await api('/api/instagram/sync',{method:'POST'});if(r.ok)toast('Updated '+r.updated+' of '+r.checked+' creators');else toast(r.error||'Not configured');}catch(e){toast(e.message);}}
+
+
+/* ---------- modal + misc ---------- */
+function openModal(title,body,foot){$('modal').innerHTML=`<div class="mhead"><h3>${title}</h3></div><div class="mbody">${body}</div><div class="mfoot">${foot}</div>`;$('modalbg').classList.add('show');}
+function closeModal(){$('modalbg').classList.remove('show');}
+$('modalbg').addEventListener('click',e=>{if(e.target===$('modalbg'))closeModal();});
+function err(e){$('content').innerHTML=`<div class="empty">⚠ ${esc(e.message)}<br><br><button class="btn ghost" onclick="go('dash')">Back</button></div>`;}
+
+/* ---------- start ---------- */
+if(TOKEN)enterApp();else $('login').style.display='flex';
+</script>
+</body>
+</html>
